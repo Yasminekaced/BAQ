@@ -54,7 +54,11 @@ def llama_sequential_calib(model, dataloader, dev):
             inps[cache['i']] = inp
             cache['i'] += 1
             cache['attention_mask'] = kwargs['attention_mask']
-            cache['position_ids'] = kwargs.get('position_ids', None)
+            # Generate position_ids if not provided
+            if 'position_ids' not in kwargs:
+                cache['position_ids'] = torch.arange(0, inp.shape[1], dtype=torch.long, device=inp.device).unsqueeze(0)
+            else:
+                cache['position_ids'] = kwargs['position_ids']
             raise ValueError
     
     layers[0] = Catcher(layers[0])
@@ -62,7 +66,9 @@ def llama_sequential_calib(model, dataloader, dev):
         try:
             if isinstance(batch, (list, tuple)):
                 batch = batch[0]
-            model(batch.to(dev))
+            # Generate attention mask if not provided
+            attention_mask = torch.ones_like(batch)
+            model(batch.to(dev), attention_mask=attention_mask)
         except ValueError:
             pass
     
@@ -88,8 +94,11 @@ def llama_sequential_calib(model, dataloader, dev):
         layer = layers[i].to(dev)
 
         subset = find_layers(layer)
-        # Skip these layers as they're not quantized
-        subset = {name: subset[name] for name in subset if not name.endswith('_proj') and not 'rotary_emb' in name}
+        # Skip rotary embeddings and other non-quantizable layers
+        subset = {name: subset[name] for name in subset 
+                 if not name.endswith('rotary_emb') and 
+                 not name.endswith('_proj') and
+                 not name.endswith('norm')}
         
         name2idx = {name: idx for idx, name in enumerate(subset)}
         gptq = {}
@@ -110,9 +119,12 @@ def llama_sequential_calib(model, dataloader, dev):
             handles.append(subset[name].register_forward_hook(add_batch(name)))
         
         for j in range(args.nsamples):
-            outs[j] = layer(inps[j].unsqueeze(0), 
-                          attention_mask=attention_mask,
-                          position_ids=position_ids)[0]
+            outs[j] = layer(
+                inps[j].unsqueeze(0), 
+                attention_mask=attention_mask,
+                position_ids=position_ids,
+                use_cache=False
+            )[0]
         
         for h in handles:
             h.remove()
@@ -138,9 +150,12 @@ def llama_sequential_calib(model, dataloader, dev):
             gptq[name].free()
             
         for j in range(args.nsamples):
-            outs[j] = layer(inps[j].unsqueeze(0), 
-                          attention_mask=attention_mask,
-                          position_ids=position_ids)[0]
+            outs[j] = layer(
+                inps[j].unsqueeze(0), 
+                attention_mask=attention_mask,
+                position_ids=position_ids,
+                use_cache=False
+            )[0]
 
         layers[i] = layer.cpu()
         del layer
