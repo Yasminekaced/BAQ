@@ -28,7 +28,6 @@ def get_llama(model):
     model = LlamaForCausalLM.from_pretrained(model, torch_dtype='auto')
     model.seqlen = 2048
     return model
-
 @torch.no_grad()
 def llama_sequential_calib(model, dataloader, dev):
     print('Starting calibration for LLaMA...')
@@ -56,7 +55,10 @@ def llama_sequential_calib(model, dataloader, dev):
             cache['attention_mask'] = kwargs['attention_mask']
             # Generate position_ids if not provided
             if 'position_ids' not in kwargs:
-                cache['position_ids'] = torch.arange(0, inp.shape[1], dtype=torch.long, device=inp.device).unsqueeze(0)
+                seq_length = inp.shape[1]
+                cache['position_ids'] = torch.arange(
+                    0, seq_length, dtype=torch.long, device=inp.device
+                ).unsqueeze(0)
             else:
                 cache['position_ids'] = kwargs['position_ids']
             raise ValueError
@@ -96,9 +98,23 @@ def llama_sequential_calib(model, dataloader, dev):
         # Get the attention layer
         attention_layer = layer.self_attn
         
-        # Newer versions of transformers handle rotary embeddings differently
-        # We'll let the attention layer handle its own position embeddings
-        # No need to manually create rotary_emb
+        # Generate rotary embeddings using the attention layer's rotary_embedding
+        if hasattr(attention_layer, 'rotary_emb'):
+            # For older versions of transformers
+            cos, sin = attention_layer.rotary_emb(position_ids)
+            kwargs = {
+                'position_embeddings': (cos, sin),
+                'position_ids': position_ids,
+                'attention_mask': attention_mask,
+                'use_cache': False
+            }
+        else:
+            # For newer versions of transformers
+            kwargs = {
+                'position_ids': position_ids,
+                'attention_mask': attention_mask,
+                'use_cache': False
+            }
 
         subset = find_layers(layer)
         # Skip attention layers and other non-quantizable layers
@@ -126,13 +142,7 @@ def llama_sequential_calib(model, dataloader, dev):
             handles.append(subset[name].register_forward_hook(add_batch(name)))
         
         for j in range(args.nsamples):
-            # Let the attention layer handle its own position embeddings
-            outs[j] = layer(
-                inps[j].unsqueeze(0), 
-                attention_mask=attention_mask,
-                position_ids=position_ids,
-                use_cache=False
-            )[0]
+            outs[j] = layer(inps[j].unsqueeze(0), **kwargs)[0]
         
         for h in handles:
             h.remove()
@@ -158,12 +168,7 @@ def llama_sequential_calib(model, dataloader, dev):
             gptq[name].free()
             
         for j in range(args.nsamples):
-            outs[j] = layer(
-                inps[j].unsqueeze(0), 
-                attention_mask=attention_mask,
-                position_ids=position_ids,
-                use_cache=False
-            )[0]
+            outs[j] = layer(inps[j].unsqueeze(0), **kwargs)[0]
 
         layers[i] = layer.cpu()
         del layer
