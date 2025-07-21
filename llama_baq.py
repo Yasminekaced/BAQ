@@ -93,17 +93,19 @@ def llama_sequential_calib(model, dataloader, dev):
     for i in tqdm(range(len(layers)), desc="Calibrating LLaMA layers"):
         layer = layers[i].to(dev)
 
-        # Get rotary embeddings from the layer itself
-        rotary_emb = layer.self_attn.rotary_emb
-        cos, sin = rotary_emb(position_ids)
-        position_embeddings = (cos, sin)
+        # Get the attention layer
+        attention_layer = layer.self_attn
+        
+        # Newer versions of transformers handle rotary embeddings differently
+        # We'll let the attention layer handle its own position embeddings
+        # No need to manually create rotary_emb
 
         subset = find_layers(layer)
-        # Skip rotary embeddings and other non-quantizable layers
+        # Skip attention layers and other non-quantizable layers
         subset = {name: subset[name] for name in subset 
-                 if not name.endswith('rotary_emb') and 
-                 not name.endswith('_proj') and
-                 not name.endswith('norm')}
+                 if not name.endswith('_proj') and
+                 not name.endswith('norm') and
+                 not name == 'self_attn'}
         
         name2idx = {name: idx for idx, name in enumerate(subset)}
         gptq = {}
@@ -124,11 +126,11 @@ def llama_sequential_calib(model, dataloader, dev):
             handles.append(subset[name].register_forward_hook(add_batch(name)))
         
         for j in range(args.nsamples):
+            # Let the attention layer handle its own position embeddings
             outs[j] = layer(
                 inps[j].unsqueeze(0), 
                 attention_mask=attention_mask,
                 position_ids=position_ids,
-                position_embeddings=position_embeddings,
                 use_cache=False
             )[0]
         
@@ -160,7 +162,6 @@ def llama_sequential_calib(model, dataloader, dev):
                 inps[j].unsqueeze(0), 
                 attention_mask=attention_mask,
                 position_ids=position_ids,
-                position_embeddings=position_embeddings,
                 use_cache=False
             )[0]
 
