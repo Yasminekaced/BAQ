@@ -25,9 +25,9 @@ def get_opt(model):
     torch.nn.init.kaiming_uniform_ = skip
     torch.nn.init.uniform_ = skip
     torch.nn.init.normal_ = skip
-    from transformers import OPTForCausalLM
-    model = OPTForCausalLM.from_pretrained(model, torch_dtype='auto')
-    model.seqlen = model.config.max_position_embeddings
+    from transformers import AutoModelForCausalLM
+    model = AutoModelForCausalLM.from_pretrained(model, torch_dtype='auto')
+    model.seqlen = 2048
     return model
 
 @torch.no_grad()
@@ -670,9 +670,9 @@ if __name__ == '__main__':
     if args.load:
         exit()
 
-    datasets = ['wikitext2', 'ptb']
+    datasets = ['wikitext2']
     if args.new_eval:
-        datasets = ['wikitext2', 'ptb-new']
+        datasets = ['wikitext2']
     for dataset in datasets: 
         dataloader, testloader = get_loaders(
             dataset, seed=args.seed, model=args.model, seqlen=model.seqlen
