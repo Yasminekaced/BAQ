@@ -39,7 +39,7 @@ def opt_sequential_calib(model, dataloader, dev):
     layers = model.model.layers
 
     model.model.embed_tokens = model.model.embed_tokens.to(dev) 
-    model.model.embed_positions = model.model.embed_positions.to(dev)
+    
     if hasattr(model.model, 'project_out') and model.model.project_out:
         model.model.project_out = model.model.project_out.to(dev) 
     if hasattr(model.model, 'project_in') and model.model.project_in:
@@ -71,7 +71,7 @@ def opt_sequential_calib(model, dataloader, dev):
 
     layers[0] = layers[0].cpu()
     model.model.embed_tokens = model.model.embed_tokens.cpu()
-    model.model.embed_positions = model.model.embed_positions.cpu()
+    
     if hasattr(model.model, 'project_out') and model.model.project_out:
         model.model.project_out = model.model.project_out.cpu()
     if hasattr(model.model, 'project_in') and model.model.project_in:
@@ -157,7 +157,6 @@ def opt_sequential(model, dataloader, dev):
     layers = model.model.layers
 
     model.model.embed_tokens = model.model.embed_tokens.to(dev) 
-    model.model.embed_positions = model.model.embed_positions.to(dev)
     if hasattr(model.model, 'project_out') and model.model.project_out:
         model.model.project_out = model.model.project_out.to(dev) 
     if hasattr(model.model, 'project_in') and model.model.project_in:
@@ -189,7 +188,7 @@ def opt_sequential(model, dataloader, dev):
 
     layers[0] = layers[0].cpu()
     model.model.embed_tokens = model.model.embed_tokens.cpu()
-    model.model.embed_positions = model.model.embed_positions.cpu()
+    
     if hasattr(model.model, 'project_out') and model.model.project_out:
         model.model.project_out = model.model.project_out.cpu()
     if hasattr(model.model, 'project_in') and model.model.project_in:
@@ -292,7 +291,7 @@ def opt_eval(model, testenc, dev):
     layers = model.model.layers
 
     model.model.embed_tokens = model.model.embed_tokens.to(dev)
-    model.model.embed_positions = model.model.embed_positions.to(dev)
+   
     if hasattr(model.model, 'project_out') and model.model.project_out:
         model.model.project_out = model.model.project_out.to(dev) 
     if hasattr(model.model, 'project_in') and model.model.project_in:
@@ -325,7 +324,7 @@ def opt_eval(model, testenc, dev):
 
     layers[0] = layers[0].cpu()
     model.model.embed_tokens = model.model.embed_tokens.cpu()
-    model.model.embed_positions = model.model.embed_positions.cpu()
+   
     if hasattr(model.model, 'project_out') and model.model.project_out:
         model.model.project_out = model.model.project_out.cpu()
     if hasattr(model.model, 'project_in') and model.model.project_in:
@@ -424,14 +423,14 @@ def load_quant3(model, checkpoint):
 
     print('Loading model ...')
     model.load_state_dict(torch.load(checkpoint))
-    model.seqlen = model.config.max_position_embeddings
+    model.seqlen = 2048
     print('Done.')
 
     return model
 
 def opt_multigpu(model, gpus):
     model.model.embed_tokens = model.model.embed_tokens.to(gpus[0])
-    model.model.embed_positions = model.model.embed_positions.to(gpus[0])
+    
     if hasattr(model.model, 'project_in') and model.model.project_in:
         model.model.project_in = model.model.project_in.to(gpus[0])
     if hasattr(model.model, 'project_out') and model.model.project_out:
