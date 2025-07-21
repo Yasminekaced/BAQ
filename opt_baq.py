@@ -36,14 +36,14 @@ def opt_sequential_calib(model, dataloader, dev):
 
     use_cache = model.config.use_cache
     model.config.use_cache = False
-    layers = model.model.decoder.layers
+    layers = model.model.layers
 
-    model.model.decoder.embed_tokens = model.model.decoder.embed_tokens.to(dev) 
-    model.model.decoder.embed_positions = model.model.decoder.embed_positions.to(dev)
-    if hasattr(model.model.decoder, 'project_out') and model.model.decoder.project_out:
-        model.model.decoder.project_out = model.model.decoder.project_out.to(dev) 
-    if hasattr(model.model.decoder, 'project_in') and model.model.decoder.project_in:
-        model.model.decoder.project_in = model.model.decoder.project_in.to(dev) 
+    model.model.embed_tokens = model.model.embed_tokens.to(dev) 
+    model.model.embed_positions = model.model.embed_positions.to(dev)
+    if hasattr(model.model, 'project_out') and model.model.project_out:
+        model.model.project_out = model.model.project_out.to(dev) 
+    if hasattr(model.model, 'project_in') and model.model.project_in:
+        model.model.project_in = model.model.project_in.to(dev) 
     layers[0] = layers[0].to(dev)
 
     dtype = next(iter(model.parameters())).dtype
@@ -70,12 +70,12 @@ def opt_sequential_calib(model, dataloader, dev):
     layers[0] = layers[0].module
 
     layers[0] = layers[0].cpu()
-    model.model.decoder.embed_tokens = model.model.decoder.embed_tokens.cpu()
-    model.model.decoder.embed_positions = model.model.decoder.embed_positions.cpu()
-    if hasattr(model.model.decoder, 'project_out') and model.model.decoder.project_out:
-        model.model.decoder.project_out = model.model.decoder.project_out.cpu()
-    if hasattr(model.model.decoder, 'project_in') and model.model.decoder.project_in:
-        model.model.decoder.project_in = model.model.decoder.project_in.cpu()
+    model.model.embed_tokens = model.model.embed_tokens.cpu()
+    model.model.embed_positions = model.model.embed_positions.cpu()
+    if hasattr(model.model, 'project_out') and model.model.project_out:
+        model.model.project_out = model.model.project_out.cpu()
+    if hasattr(model.model, 'project_in') and model.model.project_in:
+        model.model.project_in = model.model.project_in.cpu()
     torch.cuda.empty_cache()
 
     outs = torch.zeros_like(inps)
@@ -154,14 +154,14 @@ def opt_sequential(model, dataloader, dev):
 
     use_cache = model.config.use_cache
     model.config.use_cache = False
-    layers = model.model.decoder.layers
+    layers = model.model.layers
 
-    model.model.decoder.embed_tokens = model.model.decoder.embed_tokens.to(dev) 
-    model.model.decoder.embed_positions = model.model.decoder.embed_positions.to(dev)
-    if hasattr(model.model.decoder, 'project_out') and model.model.decoder.project_out:
-        model.model.decoder.project_out = model.model.decoder.project_out.to(dev) 
-    if hasattr(model.model.decoder, 'project_in') and model.model.decoder.project_in:
-        model.model.decoder.project_in = model.model.decoder.project_in.to(dev) 
+    model.model.embed_tokens = model.model.embed_tokens.to(dev) 
+    model.model.embed_positions = model.model.embed_positions.to(dev)
+    if hasattr(model.model, 'project_out') and model.model.project_out:
+        model.model.project_out = model.model.project_out.to(dev) 
+    if hasattr(model.model, 'project_in') and model.model.project_in:
+        model.model.project_in = model.model.project_in.to(dev) 
     layers[0] = layers[0].to(dev)
 
     dtype = next(iter(model.parameters())).dtype
@@ -188,12 +188,12 @@ def opt_sequential(model, dataloader, dev):
     layers[0] = layers[0].module
 
     layers[0] = layers[0].cpu()
-    model.model.decoder.embed_tokens = model.model.decoder.embed_tokens.cpu()
-    model.model.decoder.embed_positions = model.model.decoder.embed_positions.cpu()
-    if hasattr(model.model.decoder, 'project_out') and model.model.decoder.project_out:
-        model.model.decoder.project_out = model.model.decoder.project_out.cpu()
-    if hasattr(model.model.decoder, 'project_in') and model.model.decoder.project_in:
-        model.model.decoder.project_in = model.model.decoder.project_in.cpu()
+    model.model.embed_tokens = model.model.embed_tokens.cpu()
+    model.model.embed_positions = model.model.embed_positions.cpu()
+    if hasattr(model.model, 'project_out') and model.model.project_out:
+        model.model.project_out = model.model.project_out.cpu()
+    if hasattr(model.model, 'project_in') and model.model.project_in:
+        model.model.project_in = model.model.project_in.cpu()
     torch.cuda.empty_cache()
 
     outs = torch.zeros_like(inps)
@@ -289,14 +289,14 @@ def opt_eval(model, testenc, dev):
 
     use_cache = model.config.use_cache
     model.config.use_cache = False
-    layers = model.model.decoder.layers
+    layers = model.model.layers
 
-    model.model.decoder.embed_tokens = model.model.decoder.embed_tokens.to(dev)
-    model.model.decoder.embed_positions = model.model.decoder.embed_positions.to(dev)
-    if hasattr(model.model.decoder, 'project_out') and model.model.decoder.project_out:
-        model.model.decoder.project_out = model.model.decoder.project_out.to(dev) 
-    if hasattr(model.model.decoder, 'project_in') and model.model.decoder.project_in:
-        model.model.decoder.project_in = model.model.decoder.project_in.to(dev) 
+    model.model.embed_tokens = model.model.embed_tokens.to(dev)
+    model.model.embed_positions = model.model.embed_positions.to(dev)
+    if hasattr(model.model, 'project_out') and model.model.project_out:
+        model.model.project_out = model.model.project_out.to(dev) 
+    if hasattr(model.model, 'project_in') and model.model.project_in:
+        model.model.project_in = model.model.project_in.to(dev) 
     layers[0] = layers[0].to(dev)
 
     dtype = next(iter(model.parameters())).dtype
@@ -324,12 +324,12 @@ def opt_eval(model, testenc, dev):
     layers[0] = layers[0].module
 
     layers[0] = layers[0].cpu()
-    model.model.decoder.embed_tokens = model.model.decoder.embed_tokens.cpu()
-    model.model.decoder.embed_positions = model.model.decoder.embed_positions.cpu()
-    if hasattr(model.model.decoder, 'project_out') and model.model.decoder.project_out:
-        model.model.decoder.project_out = model.model.decoder.project_out.cpu()
-    if hasattr(model.model.decoder, 'project_in') and model.model.decoder.project_in:
-        model.model.decoder.project_in = model.model.decoder.project_in.cpu()
+    model.model.embed_tokens = model.model.embed_tokens.cpu()
+    model.model.embed_positions = model.model.embed_positions.cpu()
+    if hasattr(model.model, 'project_out') and model.model.project_out:
+        model.model.project_out = model.model.project_out.cpu()
+    if hasattr(model.model, 'project_in') and model.model.project_in:
+        model.model.project_in = model.model.project_in.cpu()
     torch.cuda.empty_cache()
 
     outs = torch.zeros_like(inps)
@@ -359,20 +359,20 @@ def opt_eval(model, testenc, dev):
         torch.cuda.empty_cache()
         inps, outs = outs, inps
 
-    if model.model.decoder.final_layer_norm is not None:
-        model.model.decoder.final_layer_norm = model.model.decoder.final_layer_norm.to(dev)
-    if model.model.decoder.project_out is not None:
-        model.model.decoder.project_out = model.model.decoder.project_out.to(dev)
+    if model.model.final_layer_norm is not None:
+        model.model.final_layer_norm = model.model.final_layer_norm.to(dev)
+    if model.model.project_out is not None:
+        model.model.project_out = model.model.project_out.to(dev)
     model.lm_head = model.lm_head.to(dev)
 
     testenc = testenc.to(dev)
     nlls = []
     for i in range(nsamples):
         hidden_states = inps[i].unsqueeze(0)
-        if model.model.decoder.final_layer_norm is not None:
-            hidden_states = model.model.decoder.final_layer_norm(hidden_states)
-        if model.model.decoder.project_out is not None:
-            hidden_states = model.model.decoder.project_out(hidden_states)
+        if model.model.final_layer_norm is not None:
+            hidden_states = model.model.final_layer_norm(hidden_states)
+        if model.model.project_out is not None:
+            hidden_states = model.model.project_out(hidden_states)
         lm_logits = model.lm_head(hidden_states)
         shift_logits = lm_logits[:, :-1, :].contiguous()
         shift_labels = testenc[
@@ -417,7 +417,7 @@ def load_quant3(model, checkpoint):
     torch.set_default_dtype(torch.float)
     model = model.eval()
     layers = find_layers(model)
-    for name in ['model.decoder.project_out', 'model.decoder.project_in', 'lm_head']:
+    for name in ['model.project_out', 'model.project_in', 'lm_head']:
         if name in layers:
             del layers[name]
     make_quant3(model, layers, faster=args.faster_kernel)
@@ -430,14 +430,14 @@ def load_quant3(model, checkpoint):
     return model
 
 def opt_multigpu(model, gpus):
-    model.model.decoder.embed_tokens = model.model.decoder.embed_tokens.to(gpus[0])
-    model.model.decoder.embed_positions = model.model.decoder.embed_positions.to(gpus[0])
-    if hasattr(model.model.decoder, 'project_in') and model.model.decoder.project_in:
-        model.model.decoder.project_in = model.model.decoder.project_in.to(gpus[0])
-    if hasattr(model.model.decoder, 'project_out') and model.model.decoder.project_out:
-        model.model.decoder.project_out = model.model.decoder.project_out.to(gpus[-1])
-    if hasattr(model.model.decoder, 'final_layer_norm') and model.model.decoder.final_layer_norm:
-        model.model.decoder.final_layer_norm = model.model.decoder.final_layer_norm.to(gpus[-1])
+    model.model.embed_tokens = model.model.embed_tokens.to(gpus[0])
+    model.model.embed_positions = model.model.embed_positions.to(gpus[0])
+    if hasattr(model.model, 'project_in') and model.model.project_in:
+        model.model.project_in = model.model.project_in.to(gpus[0])
+    if hasattr(model.model, 'project_out') and model.model.project_out:
+        model.model.project_out = model.model.project_out.to(gpus[-1])
+    if hasattr(model.model, 'final_layer_norm') and model.model.final_layer_norm:
+        model.model.final_layer_norm = model.model.final_layer_norm.to(gpus[-1])
     import copy
     model.lm_head = copy.deepcopy(model.lm_head).to(gpus[-1])
 
@@ -458,7 +458,7 @@ def opt_multigpu(model, gpus):
             tmp = self.module(*inp, **kwargs)
             return tmp
 
-    layers = model.model.decoder.layers
+    layers = model.model.layers
     pergpu = math.ceil(len(layers) / len(gpus))
     for i in range(len(layers)):
         layers[i] = MoveModule(layers[i].to(gpus[i // pergpu]))
@@ -475,7 +475,7 @@ def benchmark(model, input_ids, check=False):
             if cache['past']:
                 cache['past'][i] = None
         return tmp
-    for i, layer in enumerate(model.model.decoder.layers):
+    for i, layer in enumerate(model.model.layers):
         layer.register_forward_hook(clear_past(i))
 
     print('Benchmarking ...')
@@ -526,7 +526,7 @@ if __name__ == '__main__':
         help='OPT model to load; pass `facebook/opt-X`.'
     )
     parser.add_argument(
-        'dataset', type=str, choices=['wikitext2', 'ptb'],
+        'dataset', type=str, choices=['wikitext2'],
         help='Where to extract calibration data from.'
     )
     parser.add_argument(
